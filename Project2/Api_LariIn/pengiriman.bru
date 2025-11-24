@@ -1,0 +1,27 @@
+meta {
+  name: pengiriman
+  type: http
+  seq: 2
+}
+
+post {
+  url: localhost/UTSPemogramanWeb/insert_pengiriman.php
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  id: 
+  nama_pengirim: alphin
+  nama_penerima: faza
+  alamat: surabaya
+  berat: 1
+  tanggal: 2025-11-24
+  status: 
+  no_resi: 
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
