@@ -63,7 +63,8 @@ Cek Resi
 <img width="2559" height="1599" alt="image" src="https://github.com/user-attachments/assets/05ea5c76-1514-4e7d-bff7-7932820e5ec7" />
 
 Crud Api table pengiriman Menggunakan Bruno
-<img width="940" height="588" alt="image" src="https://github.com/user-attachments/assets/0111969c-bddb-4cf9-9d12-f094cdac161d" />
+<img width="940" height="588" alt="image" src="https://github.com/user-attachments/assets/0b3a956c-de7c-4e75-ae6d-9602c3525cf8" />
+
 pada xampp
 <img width="940" height="588" alt="image" src="https://github.com/user-attachments/assets/a4a646f1-3c70-4b0f-9685-ab6a1368baf0" />
 
