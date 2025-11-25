@@ -1,41 +1,69 @@
 <?php
+header("Content-Type: application/json");
+include 'connection.php';
 
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    echo json_encode([
+        "status" => "error",
+        "message" => "Metode harus POST"
+    ]);
+    exit();
+}
+$nama_pengirim  = $_POST['nama_pengirim'] ?? '';
+$nama_penerima  = $_POST['nama_penerima'] ?? '';
+$alamat         = $_POST['alamat'] ?? '';
+$berat          = (float)($_POST['berat'] ?? 0);
+$tanggal        = $_POST['tanggal'] ?? '';
 
-if (!isset($conn)) {
-    include 'connection.php';
+$status = $_POST['status'] ?? '';
+if (empty($status)) {
+    $status = "Dalam Proses";
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && basename($_SERVER['PHP_SELF']) == 'kirim_paket.php') {
-    $nama_pengirim = $conn->real_escape_string($_POST['nama_pengirim']);
-    $nama_penerima = $conn->real_escape_string($_POST['nama_penerima']);
-    $alamat_penerima = $conn->real_escape_string($_POST['alamat_penerima']);
-    $berat = (float)$_POST['berat'];
-    $tanggal_kirim = $conn->real_escape_string($_POST['tanggal_kirim']);
-    $status = "Dalam Proses"; 
+$no_resi = 'LARI-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
 
-    $resi_code = 'LARI-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
-
-    if ($berat <= 0 || empty($nama_penerima) || empty($alamat_penerima)) {
-        $_SESSION['kirim_error'] = "Input data tidak valid. Pastikan semua kolom terisi dengan benar.";
-        header("Location: kirim_paket.php");
-        exit();
-    }
-
-
-    $stmt = $conn->prepare("INSERT INTO pengiriman (nama_pengirim, nama_penerima, alamat_penerima, berat, tanggal_kirim, status, resi_code) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssdsss", $nama_pengirim, $nama_penerima, $alamat_penerima, $berat, $tanggal_kirim, $status, $resi_code);
-
-    if ($stmt->execute()) {
-        $_SESSION['kirim_success'] = "Pengiriman berhasil dibuat! Kode Resi Anda: <strong>" . $resi_code . "</strong>";
-        $stmt->close();
-        header("Location: kirim_paket.php");
-        exit();
-    } else {
-        $_SESSION['kirim_error'] = "Gagal menyimpan pengiriman ke database: " . $stmt->error;
-        $stmt->close();
-        header("Location: kirim_paket.php");
-        exit();
+if (strpos($tanggal, "/") !== false) {
+    $tgl = DateTime::createFromFormat("d/m/Y", $tanggal);
+    if ($tgl) {
+        $tanggal = $tgl->format("Y-m-d");
     }
 }
 
-?>
+if ($berat <= 0 || empty($nama_pengirim) || empty($nama_penerima) || empty($alamat)) {
+    echo json_encode([
+        "status" => "error",
+        "message" => "Input tidak valid"
+    ]);
+    exit();
+}
+
+$stmt = $conn->prepare("
+    INSERT INTO pengiriman (nama_pengirim, nama_penerima, alamat, berat, tanggal, status, no_resi)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+");
+
+$stmt->bind_param(
+    "sssdsss",
+    $nama_pengirim,
+    $nama_penerima,
+    $alamat,
+    $berat,
+    $tanggal,
+    $status,
+    $no_resi
+);
+
+if ($stmt->execute()) {
+    echo json_encode([
+        "status" => "success",
+        "message" => "Berhasil menambahkan pengiriman",
+        "no_resi" => $no_resi,
+        "status_tersimpan" => $status,
+        "tanggal_tearsimpan" => $tanggal
+    ]);
+} else {
+    echo json_encode([
+        "status" => "error",
+        "message" => "Database error: " . $stmt->error
+    ]);
+}
